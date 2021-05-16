@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Serafim\CastXml\Parser\Ast;
+namespace Serafim\CastXml\Ast;
 
 class UnimplementedType extends Type implements NamedTypeInterface
 {

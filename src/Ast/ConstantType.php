@@ -9,13 +9,13 @@
 
 declare(strict_types=1);
 
-namespace Serafim\CastXml\Parser\Ast;
+namespace Serafim\CastXml\Ast;
 
 /**
  * @template T of TypeInterface
  * @template-implements GenericTypeInterface<T>
  */
-class Field extends Type implements OptionalNamedTypeInterface, GenericTypeInterface
+class ConstantType extends Type implements GenericTypeInterface
 {
     /**
      * @var T
@@ -23,30 +23,11 @@ class Field extends Type implements OptionalNamedTypeInterface, GenericTypeInter
     private TypeInterface $type;
 
     /**
-     * @var string|null
-     */
-    private ?string $name;
-
-    /**
      * @param T $type
-     * @param string|null $name
      */
-    public function __construct(TypeInterface $type, ?string $name)
+    public function __construct(TypeInterface $type)
     {
         $this->type = $type;
-        $this->name = $name;
-    }
-
-    /**
-     * @param TypeInterface $type
-     * @return $this
-     */
-    public function withType(TypeInterface $type): self
-    {
-        $self = clone $this;
-        $self->type = $type;
-
-        return $self;
     }
 
     /**
@@ -59,23 +40,15 @@ class Field extends Type implements OptionalNamedTypeInterface, GenericTypeInter
     }
 
     /**
-     * @param string|null $name
+     * @param TypeInterface $type
      * @return $this
      */
-    public function withName(?string $name): self
+    public function withType(TypeInterface $type): self
     {
         $self = clone $this;
-        $self->name = $name;
+        $self->type = $type;
 
         return $self;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getName(): ?string
-    {
-        return $this->name;
     }
 
     /**

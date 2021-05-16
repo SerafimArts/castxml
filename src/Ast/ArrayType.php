@@ -9,23 +9,23 @@
 
 declare(strict_types=1);
 
-namespace Serafim\CastXml\Parser\Ast;
+namespace Serafim\CastXml\Ast;
 
 /**
  * @template T of TypeInterface
  * @template-implements GenericTypeInterface<T>
  */
-class Pointer extends Type implements GenericTypeInterface
+class ArrayType extends Type implements GenericTypeInterface
 {
     /**
      * @var positive-int|0
      */
-    private int $size;
+    private int $min;
 
     /**
      * @var positive-int|0
      */
-    private int $align;
+    private int $max;
 
     /**
      * @var T
@@ -34,14 +34,14 @@ class Pointer extends Type implements GenericTypeInterface
 
     /**
      * @param T $of
-     * @param positive-int|0 $size
-     * @param positive-int|0 $align
+     * @param positive-int|0 $min
+     * @param positive-int|0 $max
      */
-    public function __construct(TypeInterface $of, int $size = 8, int $align = 8)
+    public function __construct(TypeInterface $of, int $min, int $max)
     {
         $this->of = $of;
-        $this->size = $size;
-        $this->align = $align;
+        $this->min = $min;
+        $this->max = $max;
     }
 
     /**
@@ -54,29 +54,29 @@ class Pointer extends Type implements GenericTypeInterface
     }
 
     /**
-     * @param positive-int|0 $size
+     * @param positive-int|0 $min
      * @return $this
      */
-    public function withSize(int $size): self
+    public function withMin(int $min): self
     {
-        assert($size >= 0);
+        assert($min >= 0);
 
         $self = clone $this;
-        $self->size = $size;
+        $self->min = $min;
 
         return $self;
     }
 
     /**
-     * @param positive-int|0 $align
+     * @param positive-int|0 $max
      * @return $this
      */
-    public function withAlign(int $align): self
+    public function withMax(int $max): self
     {
-        assert($align >= 0);
+        assert($max >= 0);
 
         $self = clone $this;
-        $self->align = $align;
+        $self->max = $max;
 
         return $self;
     }
@@ -93,6 +93,21 @@ class Pointer extends Type implements GenericTypeInterface
         return $self;
     }
 
+    /**
+     * @return int
+     */
+    public function getMin(): int
+    {
+        return $this->min;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMax(): int
+    {
+        return $this->max;
+    }
 
     /**
      * {@inheritDoc}
@@ -100,21 +115,5 @@ class Pointer extends Type implements GenericTypeInterface
     public function of(): TypeInterface
     {
         return $this->of;
-    }
-
-    /**
-     * @return positive-int|0
-     */
-    public function getSize(): int
-    {
-        return $this->size;
-    }
-
-    /**
-     * @return positive-int|0
-     */
-    public function getAlign(): int
-    {
-        return $this->align;
     }
 }

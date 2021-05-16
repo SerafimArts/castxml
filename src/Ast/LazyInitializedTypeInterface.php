@@ -9,8 +9,12 @@
 
 declare(strict_types=1);
 
-namespace Serafim\CastXml\Parser\Ast;
+namespace Serafim\CastXml\Ast;
 
-interface TypeInterface
+interface LazyInitializedTypeInterface
 {
+    /**
+     * @return void
+     */
+    public function resolve(): void;
 }

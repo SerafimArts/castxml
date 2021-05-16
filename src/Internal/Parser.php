@@ -9,8 +9,12 @@
 
 declare(strict_types=1);
 
-namespace Serafim\CastXml\Parser\Ast;
+namespace Serafim\CastXml\Internal;
 
-abstract class Type implements TypeInterface
+/**
+ * @internal Parser is an internal library class, please do not use it in your code.
+ * @psalm-internal Serafim\CastXml
+ */
+abstract class Parser implements ParserInterface
 {
 }

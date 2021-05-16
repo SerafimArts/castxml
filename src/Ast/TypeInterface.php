@@ -9,15 +9,8 @@
 
 declare(strict_types=1);
 
-namespace Serafim\CastXml\Parser\Ast;
+namespace Serafim\CastXml\Ast;
 
-/**
- * @template T of TypeInterface
- */
-interface GenericTypeInterface extends TypeInterface
+interface TypeInterface
 {
-    /**
-     * @return T
-     */
-    public function of(): TypeInterface;
 }

@@ -11,12 +11,23 @@ declare(strict_types=1);
 
 namespace Serafim\CastXml;
 
+use Serafim\CastXml\Ast\TypeInterface;
 use Serafim\CastXml\Exception\CastXmlException;
-use Serafim\CastXml\Parser\CastXMLParser;
-use Serafim\CastXml\Parser\ParserInterface;
+use Serafim\CastXml\Exception\DependencyException;
+use Serafim\CastXml\Internal\CastXMLParser;
+use Serafim\CastXml\Internal\ParserInterface;
 
-final class Result implements \Stringable
+/**
+ * @template-implements \IteratorAggregate<int, TypeInterface>
+ * @see TypeInterface
+ */
+final class Result implements \Stringable, \IteratorAggregate
 {
+    /**
+     * @var string
+     */
+    private const SCHEMA_XSD = __DIR__ . '/../resources/castxml.xsd';
+
     /**
      * @var \SplFileInfo
      */
@@ -28,6 +39,11 @@ final class Result implements \Stringable
     private bool $disposable;
 
     /**
+     * @var ParserInterface|null
+     */
+    private ?ParserInterface $parser = null;
+
+    /**
      * @param \SplFileInfo $file
      * @param bool $disposable
      */
@@ -35,6 +51,16 @@ final class Result implements \Stringable
     {
         $this->file = $file;
         $this->disposable = $disposable;
+    }
+
+    /**
+     * @param string $file
+     * @param bool $disposable
+     * @return static
+     */
+    public static function fromPathname(string $file, bool $disposable = false): self
+    {
+        return new self(new \SplFileInfo($file), $disposable);
     }
 
     /**
@@ -77,30 +103,26 @@ final class Result implements \Stringable
     public function toXml(int $options = 0): \SimpleXMLElement
     {
         if (! \function_exists('\\simplexml_load_file')) {
-            throw new CastXmlException('ext-simplexml extension not available');
+            throw new DependencyException('ext-simplexml extension not available');
         }
 
         return \simplexml_load_string(
             \file_get_contents($this->file->getPathname()),
-            null,
+            \SimpleXMLElement::class,
             $options
         );
     }
 
     /**
      * @param int $flags
-     * @param string|null $encoding
+     * @param string $encoding
      * @return \XMLReader
      * @throws CastXmlException
      */
-    public function toXmlReader(int $flags = 0, string $encoding = null): \XMLReader
+    public function toXmlReader(int $flags = 0, string $encoding = 'UTF-8'): \XMLReader
     {
         if (! \class_exists(\XMLReader::class)) {
-            throw new CastXmlException('ext-xmlreader extension not available');
-        }
-
-        if (\version_compare(\PHP_VERSION, '8.0.0') >= 0) {
-            return \XMLReader::open($this->file->getPathname(), $encoding, $flags);
+            throw new DependencyException('ext-xmlreader extension not available');
         }
 
         $reader = new \XMLReader();
@@ -110,11 +132,35 @@ final class Result implements \Stringable
     }
 
     /**
-     * @return ParserInterface
+     * @param string $charset
+     * @return \DOMDocument
+     * @throws DependencyException
      */
-    public function toPhp(): ParserInterface
+    public function toDomDocument(string $charset = 'UTF-8'): \DOMDocument
     {
-        return new CastXMLParser($this->file);
+        if (! \class_exists(\DOMDocument::class)) {
+            throw new DependencyException('ext-dom extension not available');
+        }
+
+        $internalErrors = \libxml_use_internal_errors(true);
+        if (\LIBXML_VERSION < 20900) {
+            $disableEntities = \libxml_disable_entity_loader(true);
+        }
+
+        try {
+            $dom = new \DOMDocument('1.0', $charset);
+            $dom->validateOnParse = true;
+            $dom->xmlStandalone = true;
+            $dom->load($this->file->getFilename(), \LIBXML_NONET);
+            $dom->schemaValidate(self::SCHEMA_XSD);
+
+            return $dom;
+        } finally {
+            \libxml_use_internal_errors($internalErrors);
+            if (isset($disableEntities)) {
+                \libxml_disable_entity_loader($disableEntities);
+            }
+        }
     }
 
     /**
@@ -143,5 +189,25 @@ final class Result implements \Stringable
         if ($this->disposable) {
             @\unlink($this->file->getPathname());
         }
+    }
+
+    /**
+     * @return array<array-key, TypeInterface>
+     * @throws DependencyException
+     */
+    public function toArray(): array
+    {
+        return \iterator_to_array($this->getIterator(), false);
+    }
+
+    /**
+     * @return \Traversable<int, TypeInterface>
+     * @throws DependencyException
+     */
+    public function getIterator(): \Traversable
+    {
+        $this->parser ??= new CastXMLParser($this->toDomDocument());
+
+        return $this->parser->getIterator();
     }
 }

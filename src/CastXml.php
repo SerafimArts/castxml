@@ -141,6 +141,6 @@ final class CastXml
             throw new CastXmlException('Generated file not available');
         }
 
-        return new Result(new \SplFileInfo($out), true);
+        return Result::fromPathname($out, true);
     }
 }

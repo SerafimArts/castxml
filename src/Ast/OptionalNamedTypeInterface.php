@@ -9,8 +9,12 @@
 
 declare(strict_types=1);
 
-namespace Serafim\CastXml\Parser;
+namespace Serafim\CastXml\Ast;
 
-abstract class Parser implements ParserInterface
+interface OptionalNamedTypeInterface extends TypeInterface
 {
+    /**
+     * @return string|null
+     */
+    public function getName(): ?string;
 }

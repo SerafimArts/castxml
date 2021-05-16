@@ -128,7 +128,18 @@ $simplexml = $result->toXml();
 //  - ext-xmlreader required
 $reader = $result->toXmlReader();
 
-// Using PHP Nodes
-//  - symfony/dom-crawler required
-$ast = $result->toPhp();
+// Using DOMDocument
+//  - ext-dom required
+$ast = $result->toDomDocument();
+```
+
+### Result PHP Types
+
+```php
+$castxml = new \Serafim\CastXml\CastXml();
+$result = $castxml->parse('/path/to/header.h');
+
+foreach ($result as $type) {
+    var_dump($type);
+}
 ```

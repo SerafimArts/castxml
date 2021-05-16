@@ -9,11 +9,8 @@
 
 declare(strict_types=1);
 
-namespace Serafim\CastXml\Parser;
+namespace Serafim\CastXml\Ast;
 
-/**
- * @template-implements \IteratorAggregate<int, TypeInterface>
- */
-interface ParserInterface extends \IteratorAggregate
+abstract class Type implements TypeInterface
 {
 }

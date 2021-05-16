@@ -9,23 +9,23 @@
 
 declare(strict_types=1);
 
-namespace Serafim\CastXml\Parser\Ast;
+namespace Serafim\CastXml\Ast;
 
 /**
  * @template T of TypeInterface
  * @template-implements GenericTypeInterface<T>
  */
-class ArrayType extends Type implements GenericTypeInterface
+class Pointer extends Type implements GenericTypeInterface
 {
     /**
      * @var positive-int|0
      */
-    private int $min;
+    private int $size;
 
     /**
      * @var positive-int|0
      */
-    private int $max;
+    private int $align;
 
     /**
      * @var T
@@ -34,14 +34,14 @@ class ArrayType extends Type implements GenericTypeInterface
 
     /**
      * @param T $of
-     * @param positive-int|0 $min
-     * @param positive-int|0 $max
+     * @param positive-int|0 $size
+     * @param positive-int|0 $align
      */
-    public function __construct(TypeInterface $of, int $min, int $max)
+    public function __construct(TypeInterface $of, int $size = 8, int $align = 8)
     {
         $this->of = $of;
-        $this->min = $min;
-        $this->max = $max;
+        $this->size = $size;
+        $this->align = $align;
     }
 
     /**
@@ -54,29 +54,29 @@ class ArrayType extends Type implements GenericTypeInterface
     }
 
     /**
-     * @param positive-int|0 $min
+     * @param positive-int|0 $size
      * @return $this
      */
-    public function withMin(int $min): self
+    public function withSize(int $size): self
     {
-        assert($min >= 0);
+        assert($size >= 0);
 
         $self = clone $this;
-        $self->min = $min;
+        $self->size = $size;
 
         return $self;
     }
 
     /**
-     * @param positive-int|0 $max
+     * @param positive-int|0 $align
      * @return $this
      */
-    public function withMax(int $max): self
+    public function withAlign(int $align): self
     {
-        assert($max >= 0);
+        assert($align >= 0);
 
         $self = clone $this;
-        $self->max = $max;
+        $self->align = $align;
 
         return $self;
     }
@@ -93,21 +93,6 @@ class ArrayType extends Type implements GenericTypeInterface
         return $self;
     }
 
-    /**
-     * @return int
-     */
-    public function getMin(): int
-    {
-        return $this->min;
-    }
-
-    /**
-     * @return int
-     */
-    public function getMax(): int
-    {
-        return $this->max;
-    }
 
     /**
      * {@inheritDoc}
@@ -115,5 +100,21 @@ class ArrayType extends Type implements GenericTypeInterface
     public function of(): TypeInterface
     {
         return $this->of;
+    }
+
+    /**
+     * @return positive-int|0
+     */
+    public function getSize(): int
+    {
+        return $this->size;
+    }
+
+    /**
+     * @return positive-int|0
+     */
+    public function getAlign(): int
+    {
+        return $this->align;
     }
 }

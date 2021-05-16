@@ -9,31 +9,34 @@
 
 declare(strict_types=1);
 
-namespace Serafim\CastXml\Parser;
+namespace Serafim\CastXml\Internal;
 
-use Serafim\CastXml\Parser\Ast\ArrayType;
-use Serafim\CastXml\Parser\Ast\CallbackType;
-use Serafim\CastXml\Parser\Ast\ConstantType;
-use Serafim\CastXml\Parser\Ast\EnumType;
-use Serafim\CastXml\Parser\Ast\Field;
-use Serafim\CastXml\Parser\Ast\FunctionArgument;
-use Serafim\CastXml\Parser\Ast\FunctionDefinition;
-use Serafim\CastXml\Parser\Ast\FundamentalType;
-use Serafim\CastXml\Parser\Ast\LazyInitializedTypeInterface;
-use Serafim\CastXml\Parser\Ast\Pointer;
-use Serafim\CastXml\Parser\Ast\StructType;
-use Serafim\CastXml\Parser\Ast\TypeDefinition;
-use Serafim\CastXml\Parser\Ast\TypeInterface;
-use Serafim\CastXml\Parser\Ast\UnimplementedType;
-use Serafim\CastXml\Parser\Ast\UnionType;
-use Symfony\Component\DomCrawler\Crawler;
+use Serafim\CastXml\Ast\ArrayType;
+use Serafim\CastXml\Ast\CallbackType;
+use Serafim\CastXml\Ast\ConstantType;
+use Serafim\CastXml\Ast\EnumType;
+use Serafim\CastXml\Ast\Field;
+use Serafim\CastXml\Ast\FunctionArgument;
+use Serafim\CastXml\Ast\FunctionDefinition;
+use Serafim\CastXml\Ast\FundamentalType;
+use Serafim\CastXml\Ast\LazyInitializedTypeInterface;
+use Serafim\CastXml\Ast\Pointer;
+use Serafim\CastXml\Ast\StructType;
+use Serafim\CastXml\Ast\TypeDefinition;
+use Serafim\CastXml\Ast\TypeInterface;
+use Serafim\CastXml\Ast\UnimplementedType;
+use Serafim\CastXml\Ast\UnionType;
 
+/**
+ * @internal CastXMLParser is an internal library class, please do not use it in your code.
+ * @psalm-internal Serafim\CastXml
+ */
 final class CastXMLParser extends Parser
 {
     /**
-     * @var Crawler
+     * @var \DOMDocument
      */
-    private Crawler $dom;
+    private \DOMDocument $dom;
 
     /**
      * @var string
@@ -49,15 +52,17 @@ final class CastXMLParser extends Parser
     private \ArrayObject $storage;
 
     /**
-     * @param \SplFileInfo $file
+     * @param \DOMDocument $dom
      */
-    public function __construct(\SplFileInfo $file)
+    public function __construct(\DOMDocument $dom)
     {
         $this->storage = new \ArrayObject();
 
-        $this->dom = new Crawler(
-            \file_get_contents($file->getPathname())
-        );
+        if (! $dom->firstChild || $dom->firstChild->nodeName !== 'CastXML') {
+            throw new \InvalidArgumentException('Passed DOMDocument is not looks like of CastXML file');
+        }
+
+        $this->dom = $dom;
     }
 
     /**
@@ -65,16 +70,19 @@ final class CastXMLParser extends Parser
      */
     public function getIterator(): \Traversable
     {
-        $root = $this->dom->filter('CastXML');
+        /** @var \DOMNode $root */
+        $root = $this->dom->firstChild;
 
         /** @var \DOMElement $el */
-        foreach ($root->children() as $el) {
+        foreach ($root->childNodes as $el) {
             if (\in_array($el->nodeName, self::IGNORED_NODES, true)) {
                 continue;
             }
 
-            /** @var TypeDefinition $result */
-            yield $this->findOrCreate($el);
+            if ($el instanceof \DOMElement) {
+                /** @var TypeDefinition $result */
+                yield $this->findOrCreate($el);
+            }
         }
     }
 
@@ -192,7 +200,7 @@ final class CastXMLParser extends Parser
         $result = [];
 
         /** @var \DOMElement $argument */
-        foreach ($arguments as $id => $argument) {
+        foreach ($arguments as $argument) {
             if ($argument->nodeName === '#text') {
                 continue;
             }
@@ -436,25 +444,32 @@ final class CastXMLParser extends Parser
      */
     private function findOrCreateId(string $id): TypeInterface
     {
-        $node = $this->getElementById($id);
-
-        if (! $node instanceof \DOMElement) {
-            throw new \LogicException('DOMElement [#' . $id . '] could not be found');
-        }
-
-        return $this->findOrCreate($node);
+        return $this->findOrCreate(
+            $this->getElementById($id)
+        );
     }
 
     /**
      * @param string $id
-     * @return \DOMNode|null
+     * @return \DOMElement
      */
-    private function getElementById(string $id): ?\DOMNode
+    private function getElementById(string $id): \DOMElement
     {
-        return $this->dom
-            ->filter("#$id")
-            ->first()
-            ->getNode(0)
-        ;
+        $result = $this->findElementById($id);
+
+        if (! $result instanceof \DOMElement) {
+            throw new \LogicException('DOMElement(id="' . $id . '") could not be found');
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param string $id
+     * @return \DOMElement|null
+     */
+    private function findElementById(string $id): ?\DOMElement
+    {
+        return $this->dom->getElementById($id);
     }
 }

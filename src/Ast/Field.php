@@ -9,13 +9,13 @@
 
 declare(strict_types=1);
 
-namespace Serafim\CastXml\Parser\Ast;
+namespace Serafim\CastXml\Ast;
 
 /**
  * @template T of TypeInterface
  * @template-implements GenericTypeInterface<T>
  */
-class FunctionArgument extends Type implements OptionalNamedTypeInterface, GenericTypeInterface
+class Field extends Type implements OptionalNamedTypeInterface, GenericTypeInterface
 {
     /**
      * @var T
@@ -28,11 +28,6 @@ class FunctionArgument extends Type implements OptionalNamedTypeInterface, Gener
     private ?string $name;
 
     /**
-     * @var bool
-     */
-    private bool $variadic = false;
-
-    /**
      * @param T $type
      * @param string|null $name
      */
@@ -40,35 +35,6 @@ class FunctionArgument extends Type implements OptionalNamedTypeInterface, Gener
     {
         $this->type = $type;
         $this->name = $name;
-    }
-
-    /**
-     * @internal This method contains internal mutations and may damage the abstract syntax tree.
-     * @param TypeInterface $type
-     */
-    public function setType(TypeInterface $type): void
-    {
-        $this->type = $type;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isVariadic(): bool
-    {
-        return $this->variadic;
-    }
-
-    /**
-     * @param bool $variadic
-     * @return $this
-     */
-    public function withVariadic(bool $variadic): self
-    {
-        $self = clone $this;
-        $self->variadic = $variadic;
-
-        return $self;
     }
 
     /**
@@ -84,6 +50,15 @@ class FunctionArgument extends Type implements OptionalNamedTypeInterface, Gener
     }
 
     /**
+     * @internal This method contains internal mutations and may damage the abstract syntax tree.
+     * @param TypeInterface $type
+     */
+    public function setType(TypeInterface $type): void
+    {
+        $this->type = $type;
+    }
+
+    /**
      * @param string|null $name
      * @return $this
      */
@@ -94,7 +69,6 @@ class FunctionArgument extends Type implements OptionalNamedTypeInterface, Gener
 
         return $self;
     }
-
 
     /**
      * {@inheritDoc}

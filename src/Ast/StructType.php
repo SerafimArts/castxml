@@ -9,10 +9,15 @@
 
 declare(strict_types=1);
 
-namespace Serafim\CastXml\Parser\Ast;
+namespace Serafim\CastXml\Ast;
 
-class UnionType extends Type implements OptionalNamedTypeInterface, LazyInitializedTypeInterface
+class StructType extends Type implements NamedTypeInterface, LazyInitializedTypeInterface
 {
+    /**
+     * @var string
+     */
+    private string $name;
+
     /**
      * @var positive-int|0
      */
@@ -26,25 +31,32 @@ class UnionType extends Type implements OptionalNamedTypeInterface, LazyInitiali
     /**
      * @var array<Field|StructType|UnionType>
      */
-    private iterable $variants;
+    private iterable $fields;
 
     /**
-     * @var string|null
-     */
-    private ?string $name;
-
-    /**
-     * @param string|null $name
+     * @param string $name
      * @param positive-int|0 $size
      * @param positive-int|0 $align
-     * @param iterable<Field|StructType|UnionType> $variants
+     * @param iterable<Field|StructType|UnionType> $fields
      */
-    public function __construct(?string $name, int $size = 8, int $align = 8, iterable $variants = [])
+    public function __construct(string $name, int $size = 8, int $align = 8, iterable $fields = [])
     {
+        $this->name = $name;
         $this->size = $size;
         $this->align = $align;
-        $this->variants = $variants;
-        $this->name = $name;
+        $this->fields = $fields;
+    }
+
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function withName(string $name): self
+    {
+        $self = clone $this;
+        $self->name = $name;
+
+        return $self;
     }
 
     /**
@@ -76,33 +88,22 @@ class UnionType extends Type implements OptionalNamedTypeInterface, LazyInitiali
     }
 
     /**
-     * @param iterable<Field|StructType|UnionType> $variants
+     * @param iterable<Field|StructType|UnionType> $fields
      * @return $this
      */
-    public function withVariants(iterable $variants): self
+    public function withFields(iterable $fields): self
     {
         $self = clone $this;
-        $self->variants = $variants;
+        $self->fields = $fields;
 
         return $self;
     }
 
-    /**
-     * @param string|null $name
-     * @return $this
-     */
-    public function withName(?string $name): self
-    {
-        $self = clone $this;
-        $self->name = $name;
-
-        return $self;
-    }
 
     /**
-     * @return string|null
+     * {@inheritDoc}
      */
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -126,36 +127,36 @@ class UnionType extends Type implements OptionalNamedTypeInterface, LazyInitiali
     /**
      * @return array<Field|StructType|UnionType>
      */
-    public function getVariants(): array
+    public function getFields(): array
     {
         $this->resolve();
 
-        return $this->variants;
+        return $this->fields;
     }
 
     /**
-     * {@inheritDoc}
+     * @return void
      */
     public function resolve(): void
     {
-        if ($this->variants instanceof \Traversable) {
+        if ($this->fields instanceof \Traversable) {
             // Avoid recursive resolving
-            [$variants, $this->variants] = [$this->variants, []];
+            [$fields, $this->fields] = [$this->fields, []];
 
-            foreach ($variants as $field) {
+            foreach ($fields as $field) {
                 switch (true) {
                     case $field instanceof Field:
-                        $this->variants[] = $field;
+                        $this->fields[] = $field;
                         break;
 
                     case $field instanceof OptionalNamedTypeInterface:
                         if ($field->getName()) {
-                            $this->variants[] = new Field($field, $field->getName());
+                            $this->fields[] = new Field($field, $field->getName());
                         }
                         break;
 
                     default:
-                        $this->variants[] = $field;
+                        $this->fields[] = $field;
                 }
             }
         }

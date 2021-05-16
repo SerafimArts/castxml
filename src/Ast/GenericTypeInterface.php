@@ -9,12 +9,15 @@
 
 declare(strict_types=1);
 
-namespace Serafim\CastXml\Parser\Ast;
+namespace Serafim\CastXml\Ast;
 
-interface LazyInitializedTypeInterface
+/**
+ * @template T of TypeInterface
+ */
+interface GenericTypeInterface extends TypeInterface
 {
     /**
-     * @return void
+     * @return T
      */
-    public function resolve(): void;
+    public function of(): TypeInterface;
 }

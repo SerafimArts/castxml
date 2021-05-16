@@ -9,12 +9,8 @@
 
 declare(strict_types=1);
 
-namespace Serafim\CastXml\Parser\Ast;
+namespace Serafim\CastXml\Exception;
 
-interface NamedTypeInterface extends OptionalNamedTypeInterface
+class DependencyException extends CastXmlException
 {
-    /**
-     * @return string
-     */
-    public function getName(): string;
 }
