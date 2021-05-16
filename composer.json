@@ -1,7 +1,7 @@
 {
     "name": "serafim/castxml",
     "description": "CastXml wrapper for PHP",
-    "keywords": ["xml", "ast", "parser", "ansi c", "c", "c++", "castxml", "ffi"],
+    "keywords": ["xml", "ast", "parser", "ansi c", "c", "castxml", "ffi"],
     "license": "MIT",
     "require": {
         "php": ">=7.4",
