@@ -14,12 +14,16 @@
     "require-dev": {
         "phpunit/phpunit": "^9.5",
         "vimeo/psalm": "^4.7",
+        "symfony/dom-crawler": ">=4.4",
         "symfony/var-dumper": ">=4.4"
     },
     "autoload-dev": {
         "psr-4": {
             "Serafim\\CastXml\\Tests\\": "tests"
         }
+    },
+    "suggest": {
+        "symfony/dom-crawler": "(>=4.4) XML parsing support"
     },
     "config": {
         "sort-packages": true

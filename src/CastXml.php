@@ -15,7 +15,7 @@ use Serafim\CastXml\Exception\CastXmlException;
 use Serafim\CastXml\Internal\Process;
 use Serafim\CastXml\Internal\ProcessInterface;
 
-final class Parser
+final class CastXml
 {
     /**
      * @var string

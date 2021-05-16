@@ -12,6 +12,8 @@ declare(strict_types=1);
 namespace Serafim\CastXml;
 
 use Serafim\CastXml\Exception\CastXmlException;
+use Serafim\CastXml\Parser\CastXMLParser;
+use Serafim\CastXml\Parser\ParserInterface;
 
 final class Result implements \Stringable
 {
@@ -72,7 +74,7 @@ final class Result implements \Stringable
      * @return \SimpleXMLElement
      * @throws CastXmlException
      */
-    public function toSimpleXml(int $options = 0): \SimpleXMLElement
+    public function toXml(int $options = 0): \SimpleXMLElement
     {
         if (! \function_exists('\\simplexml_load_file')) {
             throw new CastXmlException('ext-simplexml extension not available');
@@ -105,6 +107,14 @@ final class Result implements \Stringable
         $reader->open($this->file->getPathname(), $encoding, $flags);
 
         return $reader;
+    }
+
+    /**
+     * @return ParserInterface
+     */
+    public function toPhp(): ParserInterface
+    {
+        return new CastXMLParser($this->file);
     }
 
     /**
