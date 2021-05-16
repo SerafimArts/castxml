@@ -1,6 +1,7 @@
 {
     "name": "serafim/castxml",
     "description": "CastXml wrapper for PHP",
+    "keywords": ["xml", "ast", "parser", "ansi c", "c", "c++", "castxml", "ffi"],
     "require": {
         "php": ">=7.4",
         "symfony/process": ">=4.4",
