@@ -11,7 +11,7 @@ Library can be installed into any PHP application using Composer dependency mana
 
 - `composer require serafim/castxml`
 
-In order to access pipe library make sure to include `vendor/autoload.php` in your file.
+In order to access library make sure to include `vendor/autoload.php` in your file.
 
 ```php
 <?php
