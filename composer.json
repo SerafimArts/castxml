@@ -24,6 +24,11 @@
             "Serafim\\CastXml\\Tests\\": "tests"
         }
     },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    },
     "suggest": {
         "symfony/dom-crawler": "(>=4.4) XML parsing support"
     },
