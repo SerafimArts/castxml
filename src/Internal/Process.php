@@ -56,6 +56,6 @@ final class Process implements ProcessInterface
      */
     public function run(string ...$args): string
     {
-        return $this->runIn(\getcwd() ?: '.', $args);
+        return $this->runIn(\getcwd() ?: '.', ...$args);
     }
 }
