@@ -1,3 +1,5 @@
+> !!! This package is deprecated, please use https://github.com/php-ffi/ide-helper-generator instead
+
 # CastXML PHP Wrapper
 
 CastXML is a C-family abstract syntax tree XML output tool.
